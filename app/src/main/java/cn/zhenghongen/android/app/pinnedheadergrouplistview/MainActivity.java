@@ -15,8 +15,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cn.zhenghongen.android.app.libary.PinnedHeaderListView;
 import cn.zhenghongen.android.app.libary.SideBar;
@@ -88,6 +90,7 @@ public class MainActivity extends Activity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //当输入框里面的值为空，更新为原来的列表，否则为过滤数据列表
                 if (TextUtils.isEmpty(s)) {
+                    adapter.updateListView(sectionArray, sectionCountMap, list);
                     sideBar.setVisibility(View.VISIBLE);
                 } else {
                     sideBar.setVisibility(View.GONE);
@@ -108,19 +111,29 @@ public class MainActivity extends Activity {
      * @param filterStr
      */
     private void filterData(String filterStr) {
+        String[] filterSectionArray = null;
+        Map<String, Integer> filterSectionCountMap = new HashMap<String, Integer>();
         List<DataModel> filterDateList = new ArrayList<DataModel>();
         for (DataModel dataModel : list) {
             String name = dataModel.getName();
             if (name.indexOf(filterStr.toString()) != -1) {
                 filterDateList.add(dataModel);
+
+                String key = dataModel.getSortLetters();
+                if (filterSectionCountMap.get(key) == null) {
+                    filterSectionCountMap.put(key, 0);
+                }
+
+                int count = filterSectionCountMap.get(key);
+                filterSectionCountMap.put(key, count + 1);
             }
         }
-		//TODO
-        String[] sectionArray = SideBar.b;
-        private Map<String, Integer> sectionCountMap = this.getSectionCount();
 
+        filterSectionArray = new String[filterSectionCountMap.size()];
+        Set<String> keySet = filterSectionCountMap.keySet();
+        filterSectionArray = (String[]) keySet.toArray(filterSectionArray);
 
-        //adapter.updateListView(filterDateList);
+        adapter.updateListView(filterSectionArray, filterSectionCountMap, filterDateList);
     }
 
     private Map<String, Integer> getSectionCount() {
